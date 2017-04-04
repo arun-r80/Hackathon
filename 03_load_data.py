@@ -37,34 +37,31 @@ masterdata = pd.DataFrame(dataset1, columns = ['cust_name', 'salary','cust_id'])
 
 ###############################################################
 #To analyse on the bank transaction data, we will first prepare the data to represent following variables
-#For each customer id and 
-
-##aggregate transaction data , 
+#For each customer id,we will aggregate the following variables
+#total transactio amount( credit/debit wise)
+#total transaction count ( credit/debit wise)
+# salary
+#
+#We will predict outliers based on the above variables. 
+#
+###############################################################
+##aggregate transaction data , based on multi index - customer id, credit / debit
 transactionsummary_results = trasacationdata.groupby(['cust_id', 'credit/debit']).sum().reset_index()
 ##get transaction 
 
 agg_results = pd.DataFrame({'transaction_count':trasacationdata.groupby(['cust_id', 'credit/debit'],as_index=False).size()}).reset_index()
-
 agg_results.to_csv('agg_results')
 merge_finaldataset = pd.merge(transactionsummary_results,agg_results,on=['cust_id', 'credit/debit'])
+#############################################################
+# Testing set for the model would be chosen as the complete dataset
+# Although the dataset is contaminated, we would use elliptical envelope on the complete transaction date
+# by choosing appropriate contamination factor
+############################################################
 
-#merget_finaldataset_withoutsalary = merge_finaldataset.drop('salary',axis=1)
-#merget_withoutstatus = merget_finaldataset_withoutsalary.drop('status',axis=1)
-
+#create a dataset with variables mentioned about
 merge_finaldataset_trim = merge_finaldataset[['cust_id', 'credit/debit','amount','transaction_count']]
 merge_finaldataset_trim_salary = pd.merge(merge_finaldataset_trim,masterdata,how='outer',on=['cust_id'])
-merge_finaldataset_trim_salary_withoutcustid = merge_finaldataset_trim_salary[[ 'credit/debit','amount','transaction_count','salary']]
-#print (results.shape)
-#print(merge_finaldataset_trim_salary.describe())
-#print(merge_finaldataset_trim_salary)
-#merge_finaldataset_trim_salary.to_csv('merge_finaldataset_trim_salary')
- 
-#result = df2.join(df1, on='cust_id')
-#print(results)
-
-## apply elliptic envelope covariance on the data set
-#results.to_csv("results.dat")
-
+merge_finaldataset_trim_salary_withoutcustid = merge_finaldataset_trim_salary[[ 'credit/debit','amount','transaction_count','salary']] #customer id is not actually a variable
 
 #we have the final data set with us, with dimension salary added to transaction data
 #With salary dimension added, this data set is assumed to be Gaussian normal distribution 
@@ -74,6 +71,7 @@ print("starting fitting ... ")
 outlier_analysis = EllipticEnvelope(contamination=0.5).fit(merge_finaldataset_trim_salary_withoutcustid)
 print("fit completed...")
 
+# predict if the dataset is valid, by taking a testing set with unusual transactions
 testing_set = pd.DataFrame( {'cust_id' : pd.Series([42,42], index=[0,1]),
 'cr_dr' : pd.Series([0,1], index=[0,1]),
                    'count': pd.Series([1,426],index=[0,1]),
@@ -83,9 +81,7 @@ testing_set = pd.DataFrame( {'cust_id' : pd.Series([42,42], index=[0,1]),
                    })
 print(testing_set)
 print("going to predict")
-outlier_analysis.predict(testing_set[['cr_dr','total_trans_amount','count','salary']])
+outlier_analysis.predict(testing_set[['cr_dr','total_trans_amount','count','salary']]) # again, customer id is not actually a variable
                    
-# predict if the dataset is valid, by taking a training set as 1
-#outlier_analysis.predict(results.head(1))
-#########
-#need to fix the error in fit call
+
+
