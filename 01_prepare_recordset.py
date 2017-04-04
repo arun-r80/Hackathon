@@ -42,7 +42,7 @@ ftransactionwriter = csv.writer(filetrans,delimiter=',')
 TRANSSTATUS=['DONE','COMPLETED']
 
 for i in range(1,maxtransaction):	
-	custid = randint(custidmin,custidmax)
+	custid = randint(custidmin,custidmax-1)
 	debitorcredit = int(round(random.uniform(0.0,0.99)))
 	transamount = randint(mintransamount,maxtransamount)
 	transdate=randint(transstartdate,transenddate)
