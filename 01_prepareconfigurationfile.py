@@ -17,7 +17,7 @@ config.set('transactiondata','mintransactionamount','1')
 config.set('transactiondata','maxtransactionamount','10000000')
 config.set('transactiondata','customeridmin','1')
 config.set('transactiondata','customeridmax','99')
-config.set('transactiondata','maxtransactioncount','50000')
+config.set('transactiondata','maxtransactioncount','50')
 
 
 fconfig = open(os.path.join('config','configurationfile.ini'),'w')
